@@ -11,6 +11,7 @@
     pkg={{item}}
     state=installed
     update-cache=yes
+    
   with_items:
     - python-software-properties
     - cowsay
@@ -18,4 +19,36 @@
     - python-psycopg2
     - postgresql-9.3-postgis-2.1
 
+#name: Ensure the PostgreSQL service is running
+- service: name=ssh state=started
 
+- name: Ensure database is created
+  become_user: postgres
+  become: yes
+  postgresql_db: name=test_db
+                 encoding='UTF-8'
+                 state=present
+                 
+#- name: Ensure schema is created # Released ansible 2.3
+#  become_user: postgres
+#  become: yes
+#  postgresql_schema: name=test_scehma
+#                     database=test_db
+#                     state=present
+ 
+- name: Ensure user has access to the database
+  become_user: postgres
+  become: yes
+  postgresql_user: db=test_db
+                   name=test_user
+                   password=test_password
+                   priv=ALL
+                   state=present
+                   encrypted=no
+
+- name: Ensure user does not have unnecessary privileges
+  become_user: postgres
+  become: yes
+  postgresql_user: name=test_name
+                   role_attr_flags=NOSUPERUSER,NOCREATEDB
+                   state=present
