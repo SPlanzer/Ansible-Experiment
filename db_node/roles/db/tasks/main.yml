@@ -4,7 +4,9 @@
   apt_key: url=http://apt.postgresql.org/pub/repos/apt/ACCC4CF8.asc state=present 
 
 - name: Add postgres repository
-  apt_repository: repo='deb http://apt.postgresql.org/pub/repos/apt/ trusty-pgdg main' state=present
+  #apt_repository: repo='deb http://apt.postgresql.org/pub/repos/apt/ trusty-pgdg main' state=present
+  apt_repository: repo='deb http://apt.postgresql.org/pub/repos/apt/ {{ansible_distribution_release}}-pgdg main' state=present
+  
 
 - name: Install Packages
   apt: >
@@ -18,6 +20,7 @@
     - python-setuptools
     - python-psycopg2
     - postgresql-9.3-postgis-2.1
+    - git
 
 #name: Ensure the PostgreSQL service is running
 - service: name=ssh state=started
@@ -40,8 +43,8 @@
   become_user: postgres
   become: yes
   postgresql_user: db=test_db
-                   name=test_user
-                   password=test_password
+                   name={{ pg_user }}
+                   password={{ pg_user_pass }}
                    priv=ALL
                    state=present
                    encrypted=no
@@ -49,6 +52,19 @@
 - name: Ensure user does not have unnecessary privileges
   become_user: postgres
   become: yes
-  postgresql_user: name=test_name
+  postgresql_user: name={{ pg_user }}
                    role_attr_flags=NOSUPERUSER,NOCREATEDB
                    state=present
+
+- name: Clone git gaz repo
+  git: repo={{ git_repo }}
+       dest={{ git_dest }}
+
+- name: install database
+  command: psql -f {{ item }}
+
+  with_items:
+    - "{{ git_dest }}/src/gazetteer_schema.sql"
+
+
+

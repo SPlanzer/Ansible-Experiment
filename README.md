@@ -25,10 +25,21 @@ in project dir:
 * init vagrantfile
 * created inventory that will be used by mgmt node
 * created ansible.cfg
- * added to cfg the path to inventory on the mgmt node
+ * added to cfg the path to inventory on the mgmt node. Had issues with the having the cfg in the home dir. now leaving it in the master playbook dir
+ 
 * created bootstrap-mgmt.sh that will be ran by ansible on mgmt node to install dependancies into db node 
 * vagrant up
 * vagrant ssh mgmt
-* running the ssh-addkey.yml playbook to estalbish password less entry 
+* cd /vagrant
+* add host to known hosts
+ * ssh-keyscan db >> $HOME/.ssh/known_hosts
+* ssh-keygen -t rsa -b 2048
+* running the ssh-addkey.yml playbook to estalbish password less entry (ansible-playbook ssh-addkey.yml --ask-pass)  
+* run the master playbook
+* ssh db and see the results
+* 
+
+
+
 
 ...
