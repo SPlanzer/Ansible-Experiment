@@ -18,8 +18,9 @@
     - python-software-properties
     - cowsay
     - python-setuptools
+    - libpq-dev
     - python-psycopg2
-    - postgresql-9.3-postgis-2.1
+    - postgresql-{{ postgresql_version }}-postgis-{{ postgis_version }} 
     - git
 
 #name: Ensure the PostgreSQL service is running
@@ -28,10 +29,29 @@
 - name: Ensure database is created
   become_user: postgres
   become: yes
-  postgresql_db: name=test_db
+  postgresql_db: name={{ pg_db_name }}
                  encoding='UTF-8'
                  state=present
-                 
+ 
+#- name: Adds postgis to the database "{{ pg_db_name }}"
+  #become_user: postgres
+  #become_method: su
+  #become: yes
+
+  #postgresql_ext: name=postgis
+  #                db={{ pg_db_name }}
+  #                state=present
+   
+
+- name: make template_postgis a template
+  become_user: postgres
+  become: yes
+  command: psql -d {{ pg_db_name }} -c 'CREATE EXTENSION postgis;'
+  
+#psql -d {{ pg_db_name }} -c 'GRANT ALL ON geometry_columns TO PUBLIC;'
+#psql -d {{ pg_db_name }} -c 'GRANT ALL ON spatial_ref_sys TO PUBLIC;
+
+                
 #- name: Ensure schema is created # Released ansible 2.3
 #  become_user: postgres
 #  become: yes
@@ -42,7 +62,7 @@
 - name: Ensure user has access to the database
   become_user: postgres
   become: yes
-  postgresql_user: db=test_db
+  postgresql_user: db={{ pg_db_name }}
                    name={{ pg_user }}
                    password={{ pg_user_pass }}
                    priv=ALL
@@ -61,10 +81,13 @@
        dest={{ git_dest }}
 
 - name: install database
+  become_user: postgres
+  become: yes
   command: psql -f {{ item }}
 
   with_items:
-    - "{{ git_dest }}/src/gazetteer_schema.sql"
+    - "{{ git_dest }}/src/sql/gazetteer_roles.sql"
+    - "{{ git_dest }}/src/sql/gazetteer_schema.sql"
 
 
 
