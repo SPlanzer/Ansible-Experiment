@@ -30,7 +30,7 @@ Vagrant.configure("2") do |config|
       db_config.vm.hostname = "db"
       db_config.vm.network :private_network, ip: "10.0.15.18"
       db_config.vm.provider "virtualbox" do |vb|
-        vb.memory = "256"
+        vb.memory = "512"
       end
   end
 

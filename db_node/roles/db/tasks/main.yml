@@ -22,9 +22,10 @@
     - python-psycopg2
     - postgresql-{{ postgresql_version }}-postgis-{{ postgis_version }} 
     - git
+    - postgresql-9.3-pgtap
 
-#name: Ensure the PostgreSQL service is running
-- service: name=ssh state=started
+- name: Ensure the PostgreSQL service is running
+  service: name=ssh state=started
 
 - name: Ensure database is created
   become_user: postgres
@@ -32,25 +33,18 @@
   postgresql_db: name={{ pg_db_name }}
                  encoding='UTF-8'
                  state=present
- 
-#- name: Adds postgis to the database "{{ pg_db_name }}"
-  #become_user: postgres
-  #become_method: su
-  #become: yes
 
-  #postgresql_ext: name=postgis
-  #                db={{ pg_db_name }}
-  #                state=present
-   
 
-- name: make template_postgis a template
+- name: install pg extensions
   become_user: postgres
   become: yes
-  command: psql -d {{ pg_db_name }} -c 'CREATE EXTENSION postgis;'
-  
-#psql -d {{ pg_db_name }} -c 'GRANT ALL ON geometry_columns TO PUBLIC;'
-#psql -d {{ pg_db_name }} -c 'GRANT ALL ON spatial_ref_sys TO PUBLIC;
-
+  postgresql_ext: name={{ item }}
+                  db={{ pg_db_name }}
+                  state=present
+  with_items:
+    - postgis
+    - pgtap
+ 
                 
 #- name: Ensure schema is created # Released ansible 2.3
 #  become_user: postgres
@@ -80,14 +74,52 @@
   git: repo={{ git_repo }}
        dest={{ git_dest }}
 
-- name: install database
+- name: python build gazetteer_export.sql 
+  become: yes
+  become_method: sudo
+  command: python "{{ git_dest }}/src/sql/build_gazetteer_export.py" # need to make write out dynamic
+
+# temp hack
+- name: copy gazetteer_export.sql to sql dir 
+  become: yes
+  become_method: sudo
+  command: cp gazetteer_export.sql "{{ git_dest }}/src/sql/"
+
+- name: install database objects
   become_user: postgres
   become: yes
-  command: psql -f {{ item }}
+  become_method: sudo
+  command: psql -d gazetteer -f {{ item }}
 
   with_items:
     - "{{ git_dest }}/src/sql/gazetteer_roles.sql"
     - "{{ git_dest }}/src/sql/gazetteer_schema.sql"
+    - "{{ git_dest }}/src/sql/gazetteer_app_schema.sql"
+    - "{{ git_dest }}/src/sql/gazetteer_sysdata_init.sql"
+    - "{{ git_dest }}/src/sql/gazetteer_history.sql"
+    - "{{ git_dest }}/src/sql/gazetteer_sysdata.sql"
+    - "{{ git_dest }}/src/sql/gazetteer_export_schema.sql"
+    - "{{ git_dest }}/src/sql/gazetteer_functions.sql"
+    - "{{ git_dest }}/src/sql/gazetteer_geometry_views.sql"
+    - "{{ git_dest }}/src/sql/gazetteer_text_search.sql"
+    - "{{ git_dest }}/src/sql/gazetteer_search_function.sql"
+    - "{{ git_dest }}/src/sql/gazetteer_add_user.sql"
+    - "{{ git_dest }}/src/sql/gazetteer_app_funcs.sql"
+    - "{{ git_dest }}/src/sql/gazetteer_app_sysdata.sql"
+    - "{{ git_dest }}/src/sql/gazetteer_triggers.sql"
+    - "{{ git_dest }}/src/sql/gazetteer_export.sql"
+    - "{{ git_dest }}/src/sql/gazetteer_export_func.sql"
+    # note in ssh : $psql -f gazetteer_reload_web.sql 
+    - "{{ git_dest }}/src/sql/gazetteer_grant.sql"
+    - "{{ git_dest }}/src/sql/gazetteer_web_functions.sql" 
+    - "{{ git_dest }}/src/sql/gazetteer_reload_web.sql" 
+    - "{{ git_dest }}/src/sql/gazetteer_grant.sql"
+    # note in ssh : # $psql -c "select gazetteer.gweb_update_web_database()"
 
+- name: run pgtap tests
+  become_user: postgres
+  become: yes
+  become_method: sudo
+  command: pg_prove -d {{ pg_db_name }} /vagrant/{{ pgtap_script }} 
 
 
