@@ -1,0 +1,18 @@
+sudo: required
+dist: trusty
+addons:
+  hosts:
+    - travis-trusty
+language: python
+python: '2.7'
+before_install:
+  - sudo apt-get update -qq
+  - sudo apt-get install -qq python-apt
+install:
+  - pip install ansible
+
+matrix:
+  fast_finish: true
+script:
+  - ansible-playbook "deployment/playbook.yml" --syntax-check
+  - ansible-playbook "deployment/playbook.yml"
