@@ -1,0 +1,8 @@
+---
+pg_db_name: gazetteer
+pg_user: splanzer
+pg_user_pass: test_pass
+git_repo: "https://github.com/linz/gazetteer.git"
+git_dest: /home/vagrant/git
+pgtap_script: pgtap_test.sql
+

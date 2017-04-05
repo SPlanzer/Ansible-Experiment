@@ -8,5 +8,5 @@
 
   roles:
     - role: db
-# - role: pgtap
+    - role: example_db
 
