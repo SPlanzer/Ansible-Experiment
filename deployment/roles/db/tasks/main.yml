@@ -1,13 +1,14 @@
 ---
 
+### Add postgres repository key
 - name: Add postgres repository key
   apt_key: url=http://apt.postgresql.org/pub/repos/apt/ACCC4CF8.asc state=present 
 
+### Add postgres repository
 - name: Add postgres repository
-  #apt_repository: repo='deb http://apt.postgresql.org/pub/repos/apt/ trusty-pgdg main' state=present
   apt_repository: repo='deb http://apt.postgresql.org/pub/repos/apt/ {{ansible_distribution_release}}-pgdg main' state=present
   
-
+### Iterate over and install required packages
 - name: Install Packages
   apt: >
     pkg={{item}}
@@ -23,9 +24,13 @@
     - postgresql-{{ postgresql_version }}-postgis-{{ postgis_version }} 
     - git
     - postgresql-9.3-pgtap
+  tags:
+    - dependencies 
 
 - name: Ensure the PostgreSQL service is running
   service: name=ssh state=started
+  tags:
+    - dependencies 
 
 - name: Ensure database is created
   become_user: postgres

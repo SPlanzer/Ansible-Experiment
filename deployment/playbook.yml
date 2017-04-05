@@ -2,7 +2,8 @@
 
 # db
 - hosts: db
-  sudo: yes
+  become: yes
+  become_method: sudo
   gather_facts: yes
 
   roles:
