@@ -1,8 +1,6 @@
 \set ECHO none
 \set QUIET true
 \set VERBOSITY verbose
-\pset format unaligned
-\pset tuples_only true
 
 SET client_min_messages TO WARNING;
 
