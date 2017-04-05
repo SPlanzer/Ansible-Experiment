@@ -120,6 +120,6 @@
   become_user: postgres
   become: yes
   become_method: sudo
-  command: pg_prove -d {{ pg_db_name }} /vagrant/{{ pgtap_script }} 
+  command: pg_prove -d {{ pg_db_name }} /vagrant/data/{{ pgtap_script }} 
 
 
