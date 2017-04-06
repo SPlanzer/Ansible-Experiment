@@ -14,5 +14,5 @@ install:
 matrix:
   fast_finish: true
 script:
-  - ansible-playbook -i localhost "deployment/playbook.yml" --syntax-check
-  - ansible-playbook -i localhost "deployment/playbook.yml"
+  - ansible-playbook -i testing "deployment/playbook.yml" --syntax-check
+  - ansible-playbook -i testing "deployment/playbook.yml"
