@@ -9,8 +9,8 @@ before_install:
 install:
   - pip install ansible
 
-matrix:
-  fast_finish: true
+before_script:
+  - echo localhost > deployment/testing
 script:
   - ansible-playbook -i deployment/testing "deployment/playbook.yml" --syntax-check
   - ansible-playbook -i deployment/testing "deployment/playbook.yml"
