@@ -1,14 +1,25 @@
 sudo: required
 dist: trusty
 
+addons:
+  postgresql: "9.3" #
+
 language: python
 python: '2.7'
+
+before_install:
+  - sudo apt-get update -qq
+  - sudo apt-get install -qq python-apt
 
 install:
   - pip install ansible
 
+addons:
+  postgresql: "9.4"
+
 before_script:
   - echo localhost > deployment/testing
+  - psql -U postgres -c "create extension postgis" #
 script:
   - ansible-playbook -i deployment/testing "deployment/playbook.yml" --connection=local --sudo --syntax-check
   - ansible-playbook -i deployment/testing "deployment/playbook.yml" --connection=local --sudo
