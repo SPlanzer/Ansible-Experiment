@@ -12,5 +12,5 @@ install:
 before_script:
   - echo localhost > deployment/testing
 script:
-  - ansible-playbook -i deployment/testing "deployment/playbook.yml" --syntax-check
-  - ansible-playbook -i deployment/testing "deployment/playbook.yml"
+  - ansible-playbook -i deployment/testing "deployment/playbook.yml" --connection=local --syntax-check
+  - ansible-playbook -i deployment/testing "deployment/playbook.yml" --connection=local
