@@ -19,7 +19,7 @@ install:
 
 before_script:
   - echo localhost > deployment/testing
-  - psql -U postgres -c "create extension postgis" #
+
 script:
   - ansible-playbook -i deployment/testing "deployment/playbook.yml" --connection=local --sudo --syntax-check
   - ansible-playbook -i deployment/testing "deployment/playbook.yml" --connection=local --sudo
