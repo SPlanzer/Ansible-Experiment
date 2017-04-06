@@ -11,6 +11,7 @@
 - name: install pg extensions
   become_user: postgres
   become: yes
+  become_method: sudo
   postgresql_ext: name={{ item }}
                   db={{ pg_db_name }}
                   state=present
